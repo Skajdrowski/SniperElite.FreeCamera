@@ -8,5 +8,5 @@ int GetEntryPoint()
 
 int _addr(int addr)
 {
-	return GetEntryPoint() - 0x8B0000 + addr;
+	return GetEntryPoint() + addr;
 }

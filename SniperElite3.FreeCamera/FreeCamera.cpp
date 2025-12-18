@@ -20,9 +20,9 @@ void FreeCamera::Thread()
 
 		if (ms_bEnabled)
 		{
-			Nop(_addr(0x90127F), 2);
-			Nop(_addr(0x901284), 3);
-			Nop(_addr(0x90128A), 3);
+			Nop(_addr(0x15303), 2);
+			Nop(_addr(0x15308), 3);
+			Nop(_addr(0x1530E), 3);
 
 			if (cam)
 			{
@@ -55,12 +55,9 @@ void FreeCamera::Thread()
 		}
 		else
 		{
-			Patch<short>(_addr(0x90127F), 0x189);
-			Patch<short>(_addr(0x901284), 0x4189);
-			Patch<char>(_addr(0x901284 + 2), 0x4);
-			Patch<short>(_addr(0x90127F), 0x189);
-			Patch<short>(_addr(0x90128A), 0x4189);
-			Patch<char>(_addr(0x90128A + 2), 0x8);
+			Patch(_addr(0x15303), {0x89, 0x11});
+			Patch(_addr(0x15308), {0x89, 0x51, 0x04});
+			Patch(_addr(0x1530E), {0x89, 0x41, 0x08});
 		}
 
 		Sleep(1);
