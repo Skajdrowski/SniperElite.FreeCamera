@@ -1,6 +1,6 @@
 #include "Vector.h"
 
-inline float RecipSqrt(float x, float y) { return x / sqrt(y); }
+inline float RecipSqrt(float x, float y) { return x / sqrtf(y); }
 inline float RecipSqrt(float x) { return RecipSqrt(1.0f, x); }
 
 void Vector::Normalise()

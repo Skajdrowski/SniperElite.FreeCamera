@@ -12,10 +12,10 @@ public:
 		Y = b;
 		Z = c;
 	}
-	float Heading(void) const { return atan2(-X, Y); }
-	float Magnitude(void) const { return sqrt(X * X + Y * Y + Z * Z); }
+	float Heading(void) const { return atan2f(-X, Y); }
+	float Magnitude(void) const { return sqrtf(X * X + Y * Y + Z * Z); }
 	float MagnitudeSqr(void) const { return X * X + Y * Y + Z * Z; }
-	float Magnitude2D(void) const { return sqrt(X * X + Y * Y); }
+	float Magnitude2D(void) const { return sqrtf(X * X + Y * Y); }
 	float MagnitudeSqr2D(void) const { return X * X + Y * Y; }
 	void Normalise();
 
