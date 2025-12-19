@@ -7,7 +7,7 @@ bool FreeCamera::ms_bEnabled = false;
 
 void FreeCamera::Init()
 {
-	CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(Thread), nullptr, 0, nullptr);;
+	CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(Thread), nullptr, 0, nullptr);
 }
 
 void FreeCamera::Thread()

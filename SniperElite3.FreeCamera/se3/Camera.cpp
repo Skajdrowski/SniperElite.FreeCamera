@@ -3,6 +3,5 @@
 #include "..\core.h"
 Camera* GetCamera()
 {
-	//return *(Camera**)(_addr(0xFDF124)); // Sniper Elite 3
-	return 0;
+	return *(Camera**)(_addr(0x356E44));
 }
