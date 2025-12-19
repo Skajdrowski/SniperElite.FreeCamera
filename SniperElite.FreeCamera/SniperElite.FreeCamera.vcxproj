@@ -78,6 +78,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetExt>.asi</TargetExt>
+    <OutDir>$(Configuration)\</OutDir>
+    <IntDir>Intermediate\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -162,9 +164,9 @@
     <ClInclude Include="IniReader.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="se3\Camera.h" />
-    <ClInclude Include="se3\Matrix.h" />
-    <ClInclude Include="se3\Vector.h" />
+    <ClInclude Include="se1\Camera.h" />
+    <ClInclude Include="se1\Matrix.h" />
+    <ClInclude Include="se1\Vector.h" />
     <ClInclude Include="SettingsMgr.h" />
     <ClInclude Include="utils\MemoryMgr.h" />
   </ItemGroup>
@@ -179,13 +181,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="se3\Camera.cpp" />
-    <ClCompile Include="se3\Matrix.cpp" />
-    <ClCompile Include="se3\Vector.cpp" />
+    <ClCompile Include="se1\Camera.cpp" />
+    <ClCompile Include="se1\Matrix.cpp" />
+    <ClCompile Include="se1\Vector.cpp" />
     <ClCompile Include="SettingsMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SniperElite3.FreeCamera.rc" />
+    <ResourceCompile Include="SniperElite.FreeCamera.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,6 +1,6 @@
 #include "core.h"
 #include "FreeCamera.h"
-#include "se3/Camera.h"
+#include "se1/Camera.h"
 #include "SettingsMgr.h"
 
 bool FreeCamera::ms_bEnabled = false;
@@ -38,9 +38,9 @@ void FreeCamera::Thread()
 				Vector up = cam->Rotation.GetUp();
 				Vector right = cam->Rotation.GetRight();
 				if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyForward))
-					cam->Position += fwd * speed * -1;
-				if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyBack))
 					cam->Position += fwd * speed * 1;
+				if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyBack))
+					cam->Position += fwd * speed * -1;
 
 				if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyUp))
 					cam->Position += up * speed * -1;

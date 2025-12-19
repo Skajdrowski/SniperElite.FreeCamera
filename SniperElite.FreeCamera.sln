@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32002.261
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SniperElite3.FreeCamera", "SniperElite3.FreeCamera\SniperElite3.FreeCamera.vcxproj", "{233A8858-7D10-4FFD-86FB-9C03645B17F0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SniperElite.FreeCamera", "SniperElite.FreeCamera\SniperElite.FreeCamera.vcxproj", "{233A8858-7D10-4FFD-86FB-9C03645B17F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
