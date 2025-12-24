@@ -26,7 +26,8 @@ void FreeCamera::Thread()
 
 			if (cam)
 			{
-				float speed = SettingsMgr->fFreeCameraSpeed;
+				float framerate = *((float*)_addr(0x368390));
+				float speed = SettingsMgr->fFreeCameraSpeed * (framerate / 60.f);
 
 				if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeySlowDown))
 					speed /= SettingsMgr->fFreeCameraModifierScale;

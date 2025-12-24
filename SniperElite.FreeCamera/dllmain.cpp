@@ -14,7 +14,7 @@ void Init()
     FreeCamera::Init();
 #ifdef _DEBUG
     SettingsMgr->ResetKeys();
-    Patch(_addr(0xEA00E0), IsDebuggerPresent_Hook);
+    Patch(_addr(GetEntryPoint()), IsDebuggerPresent_Hook);
 #endif
 }
 
