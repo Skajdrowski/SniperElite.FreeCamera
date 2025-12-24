@@ -2,15 +2,21 @@
 
 Vector Matrix::GetForward()
 {
-	return m3;
+	Vector side = right;
+	side.Normalise();
+	Vector f = CrossProduct(side, Vector(0, -1, 0));
+	return f;
 }
 
 Vector Matrix::GetUp()
 {
-	return m2;
+    return Vector(0, -1, 0);
 }
 
 Vector Matrix::GetRight()
 {
-	return m1;
+	Vector fwd = forward;
+	fwd.Normalise();
+	Vector r = CrossProduct(fwd, Vector(0, 1, 0));
+	return r;
 }

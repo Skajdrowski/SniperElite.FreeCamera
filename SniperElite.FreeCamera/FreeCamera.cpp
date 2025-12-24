@@ -43,9 +43,9 @@ void FreeCamera::Thread()
 					cam->Position += fwd * speed * -1;
 
 				if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyUp))
-					cam->Position += up * speed * -1;
-				if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyDown))
 					cam->Position += up * speed * 1;
+				if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyDown))
+					cam->Position += up * speed * -1;
 
 				if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyRight))
 					cam->Position += right * speed * -1;
