@@ -8,9 +8,9 @@ public:
 	Vector(void) {}
 	Vector(float a, float b, float c)
 	{
-		X = c;
+		X = a;
 		Y = b;
-		Z = a;
+		Z = c;
 	}
 	float Heading(void) const { return atan2f(-X, Y); }
 	float Magnitude(void) const { return sqrtf(X * X + Y * Y + Z * Z); }
