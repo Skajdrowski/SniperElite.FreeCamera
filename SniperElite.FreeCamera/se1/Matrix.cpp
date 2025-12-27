@@ -17,6 +17,6 @@ Vector Matrix::GetRight()
 {
 	Vector fwd = forward;
 	fwd.Normalise();
-	Vector r = CrossProduct(fwd, Vector(0, 1, 0));
+	Vector r = CrossProduct(fwd, Vector(0, -1, 0));
 	return r;
 }
