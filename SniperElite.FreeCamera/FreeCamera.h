@@ -1,9 +1,12 @@
 #pragma once
 
+struct Camera;
+
 class FreeCamera {
 public:
-	static bool ms_bEnabled;
 	static void Init();
 	static void Thread();
-
+private:
+	static unsigned int ms_bEnabled;
+	static Camera* cam;
 };
