@@ -5,6 +5,12 @@
 
 Camera* FreeCamera::cam = nullptr;
 unsigned int FreeCamera::ms_bEnabled = 0;
+float FreeCamera::defaultFoV = 0.0f;
+
+constexpr float FreeCamera::clampf(float v, float lo, float hi)
+{
+	return v < lo ? lo : v > hi ? hi : v;
+}
 
 void FreeCamera::Init()
 {
@@ -15,6 +21,8 @@ void FreeCamera::Thread()
 {
 	while (true)
 	{
+		static float FoVFactor;
+
 		if (GetAsyncKeyState(SettingsMgr->iFreeCameraEnableKey) & 0x1)
 			ms_bEnabled += 1;
 
@@ -26,6 +34,11 @@ void FreeCamera::Thread()
 			Nop(_addr(0x80FA), 4);
 			Nop(_addr(0x102186), 4);
 
+			if (!defaultFoV)
+				defaultFoV = *((float*)_addr(0x2FFF08));
+			if (FoVFactor != defaultFoV)
+				FoVFactor = defaultFoV;
+
 			Nop(_addr(0x15303), 2);
 			Nop(_addr(0x15308), 3);
 			Nop(_addr(0x1530E), 3);
@@ -33,14 +46,25 @@ void FreeCamera::Thread()
 		}
 		else if (ms_bEnabled == 2)
 		{
-			float framerate = *((float*)_addr(0x368390));
-			float speed = SettingsMgr->fFreeCameraSpeed * (framerate / 60.f);
+			const float framerate = *((float*)_addr(0x368390)) / 60.f;
+			float speed = SettingsMgr->fFreeCameraSpeed * framerate;
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeySlowDown))
 				speed /= SettingsMgr->fFreeCameraModifierScale;
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeySpeedUp))
 				speed *= SettingsMgr->fFreeCameraModifierScale;
+
+			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyFoVDecrease))
+			{
+				FoVFactor -= 0.1f * framerate; FoVFactor = clampf(FoVFactor, 1.f, 165.f);
+				Patch(_addr(0x2FFF08), FoVFactor);
+			}
+			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyFoVIncrease))
+			{
+				FoVFactor += 0.1f * framerate; FoVFactor = clampf(FoVFactor, 1.f, 165.f);
+				Patch(_addr(0x2FFF08), FoVFactor);
+			}
 
 			Vector fwd = cam->Rotation.GetForward();
 			Vector up = cam->Rotation.GetUp();
@@ -64,6 +88,8 @@ void FreeCamera::Thread()
 		{
 			Patch(_addr(0x80FA), {0x66, 0x89, 0x0C, 0x28});
 			Patch(_addr(0x102186), {0xD9, 0x5C, 0x24, 0x0C});
+
+			Patch(_addr(0x2FFF08), defaultFoV);
 
 			Patch(_addr(0x15303), {0x89, 0x11});
 			Patch(_addr(0x15308), {0x89, 0x51, 0x04});
