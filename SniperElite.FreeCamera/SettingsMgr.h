@@ -16,6 +16,7 @@ public:
 	int iFreeCameraKeySpeedUp;
 	int iFreeCameraKeyFoVIncrease;
 	int iFreeCameraKeyFoVDecrease;
+	int iFreeCameraKeyPause;
 
 
 

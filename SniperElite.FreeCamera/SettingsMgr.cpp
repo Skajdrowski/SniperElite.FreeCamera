@@ -19,6 +19,7 @@ eSettingsManager::eSettingsManager()
 	iFreeCameraKeySpeedUp = ini.ReadInteger("Settings", "iFreeCameraKeySpeedUp", 0);
 	iFreeCameraKeyFoVIncrease = ini.ReadInteger("Settings", "iFreeCameraKeyFoVIncrease", 0);
 	iFreeCameraKeyFoVDecrease = ini.ReadInteger("Settings", "iFreeCameraKeyFoVDecrease", 0);
+	iFreeCameraKeyPause = ini.ReadInteger("Settings", "iFreeCameraKeyPause", 0);
 	fFreeCameraSpeed = ini.ReadFloat("Settings", "fFreeCameraSpeed", 0.05f);
 	fFreeCameraModifierScale = ini.ReadFloat("Settings", "fFreeCameraModifierScale", 4.0f);
 }
@@ -40,6 +41,7 @@ void eSettingsManager::ResetKeys()
 	iFreeCameraKeySpeedUp = 96;
 	iFreeCameraKeyFoVIncrease = 107;
 	iFreeCameraKeyFoVDecrease = 109;
+	iFreeCameraKeyPause = VK_PAUSE;
 
 	fFreeCameraSpeed = 0.05f;
 	fFreeCameraModifierScale = 4.0f;

@@ -5,7 +5,8 @@
 
 Camera* FreeCamera::cam = nullptr;
 unsigned int FreeCamera::ms_bEnabled = 0;
-float FreeCamera::defaultFoV = 0.0f;
+float FreeCamera::timePause = 0.f;
+float FreeCamera::defaultFoV = 0.f;
 
 constexpr float FreeCamera::clampf(float v, float lo, float hi)
 {
@@ -34,6 +35,11 @@ void FreeCamera::Thread()
 			Nop(_addr(0x80FA), 4);
 			Nop(_addr(0x102186), 4);
 
+			Nop(_addr(0xA1D21), 5);
+
+			if (timePause != *((float*)_addr(0x368348)))
+				timePause = *((float*)_addr(0x368348));
+
 			if (!defaultFoV)
 				defaultFoV = *((float*)_addr(0x2FFF08));
 			if (FoVFactor != defaultFoV)
@@ -54,6 +60,15 @@ void FreeCamera::Thread()
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeySpeedUp))
 				speed *= SettingsMgr->fFreeCameraModifierScale;
+
+			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyPause) & 0x1)
+			{
+				if (timePause >= 1.f)
+					timePause = 0.f;
+				else
+					timePause++;
+				Patch(_addr(0x368348), timePause);
+			}
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyFoVDecrease))
 			{
@@ -88,6 +103,8 @@ void FreeCamera::Thread()
 		{
 			Patch(_addr(0x80FA), {0x66, 0x89, 0x0C, 0x28});
 			Patch(_addr(0x102186), {0xD9, 0x5C, 0x24, 0x0C});
+
+			Patch(_addr(0xA1D21), {0xA3, 0x48, 0x83, 0x76, 0x00});
 
 			Patch(_addr(0x2FFF08), defaultFoV);
 
