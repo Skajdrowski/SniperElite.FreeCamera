@@ -70,19 +70,19 @@ void FreeCamera::Thread()
 			Vector up = cam->Rotation.GetUp();
 			Vector right = cam->Rotation.GetRight();
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyForward))
-				cam->Position += fwd * speed * 1;
+				cam->Position += fwd * speed;
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyBack))
-				cam->Position += fwd * speed * -1;
+				cam->Position -= fwd * speed;
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyUp))
-				cam->Position += up * speed * 1;
+				cam->Position += up * speed;
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyDown))
-				cam->Position += up * speed * -1;
+				cam->Position -= up * speed;
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyRight))
-				cam->Position += right * speed * 1;
+				cam->Position += right * speed;
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyLeft))
-				cam->Position += right * speed * -1;
+				cam->Position -= right * speed;
 		}
 		else if (ms_bEnabled == 3)
 		{
