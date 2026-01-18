@@ -48,6 +48,8 @@ void FreeCamera::Thread()
 			Nop(_addr(0x15303), 2);
 			Nop(_addr(0x15308), 3);
 			Nop(_addr(0x1530E), 3);
+
+			Patch(_addr(0x356E24), 0); // Disables lvl culling
 			ms_bEnabled = 2;
 		}
 		else if (ms_bEnabled == 2)
@@ -111,6 +113,9 @@ void FreeCamera::Thread()
 			Patch(_addr(0x15303), {0x89, 0x11});
 			Patch(_addr(0x15308), {0x89, 0x51, 0x04});
 			Patch(_addr(0x1530E), {0x89, 0x41, 0x08});
+
+			if (*((uint32_t*)_addr(0x356E24)) == 0)
+				Patch(_addr(0x356E24), 1);
 			ms_bEnabled = 0;
 		}
 
