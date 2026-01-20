@@ -5,8 +5,25 @@
 
 Camera* FreeCamera::cam = nullptr;
 unsigned int FreeCamera::ms_bEnabled = 0;
-float FreeCamera::timePause = 0.f;
-float FreeCamera::defaultFoV = 0.f;
+
+uintptr_t FreeCamera::camControl;
+
+uintptr_t FreeCamera::fpsAddr;
+
+uintptr_t FreeCamera::lowerText;
+uintptr_t FreeCamera::lowerOffset;
+uintptr_t FreeCamera::upperText;
+uintptr_t FreeCamera::HUD;
+
+uintptr_t FreeCamera::timeControl;
+uintptr_t FreeCamera::timeAddr;
+
+uintptr_t FreeCamera::FoVAddr;
+
+uintptr_t FreeCamera::cullingAddr;
+
+float FreeCamera::timePause;
+float FreeCamera::defaultFoV;
 
 constexpr float FreeCamera::clampf(float v, float lo, float hi)
 {
@@ -32,29 +49,53 @@ void FreeCamera::Thread()
 			if (!cam)
 				cam = GetCamera();
 
-			Nop(_addr(0x80FA), 4);
-			Nop(_addr(0x102186), 4);
+			if (!fpsAddr)
+				fpsAddr = SigScan("C7 ? ? ? ? ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9 ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9", true, 2);
 
-			Nop(_addr(0xA1D21), 5);
+			if (!lowerText && !upperText && !HUD)
+			{
+				lowerText = SigScan("D8 ? ? ? ? ? D9 ? ? D9 ? ? ? D8 ? ? ? ? ? D9 ? ? ? ? ? D9 ? ? ? D8", false);
+				Read(lowerText + 2, lowerOffset);
+				upperText = SigScan("8B ? ? ? 83 ? ? 8D ? ? ? 50 89", false);
+				HUD = SigScan("D9 ? ? ? D9 ? ? ? D8 ? ? D9 ? ? D9 ? ? ? D8 ? ? D9 ? ? D9 ? ? ? D8", false);
+			}
+			Patch(lowerText, {0xD8, 0xC8, 0x90, 0x90, 0x90, 0x90});
+			Nop(upperText, 4);
+			Nop(HUD, 4);
 
-			if (timePause != *((float*)_addr(0x368348)))
-				timePause = *((float*)_addr(0x368348));
+			if (!timeControl)
+			{
+				timeControl = SigScan("A3 ? ? ? ? DF ? F6 ? ? 75", false);
+				Read(timeControl + 1, timeAddr);
+			}
+			Nop(timeControl, 5);
+			if (timePause != *((float*)timeAddr))
+				Read(timeAddr, timePause);
+
+			if (!FoVAddr)
+				FoVAddr = SigScan("D8 ? ? ? ? ? A1 ? ? ? ? C3 D8", true, 2);
 
 			if (!defaultFoV)
-				defaultFoV = *((float*)_addr(0x2FFF08));
+				Read(FoVAddr, defaultFoV);
 			if (FoVFactor != defaultFoV)
 				FoVFactor = defaultFoV;
 
-			Nop(_addr(0x15303), 2);
-			Nop(_addr(0x15308), 3);
-			Nop(_addr(0x1530E), 3);
+			if (!camControl)
+				camControl = SigScan("89 ? 8B ? ? 89 ? ? 8B ? ? 89 ? ? C3 ? ? ? ? ? ? ? ? ? ? ? ? ? ? 56", false);
 
-			Patch(_addr(0x356E24), 0); // Disables lvl culling
+			Nop(camControl, 2);
+			Nop(camControl + 5, 3);
+			Nop(camControl + 11, 3);
+
+			if (!cullingAddr)
+				cullingAddr = SigScan("C6 ? ? ? ? ? ? 5B E9 ? ? ? ? 5B", true, 2);
+			Patch(cullingAddr, 0);
+
 			ms_bEnabled = 2;
 		}
 		else if (ms_bEnabled == 2)
 		{
-			const float framerate = *((float*)_addr(0x368390)) / 60.f;
+			const float framerate = *((float*)fpsAddr) / 60.f;
 			float speed = SettingsMgr->fFreeCameraSpeed * framerate;
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeySlowDown))
@@ -69,18 +110,18 @@ void FreeCamera::Thread()
 					timePause = 0.f;
 				else
 					timePause++;
-				Patch(_addr(0x368348), timePause);
+				Patch(timeAddr, timePause);
 			}
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyFoVDecrease))
 			{
 				FoVFactor -= 0.1f * framerate; FoVFactor = clampf(FoVFactor, 1.f, 165.f);
-				Patch(_addr(0x2FFF08), FoVFactor);
+				Patch(FoVAddr, FoVFactor);
 			}
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyFoVIncrease))
 			{
 				FoVFactor += 0.1f * framerate; FoVFactor = clampf(FoVFactor, 1.f, 165.f);
-				Patch(_addr(0x2FFF08), FoVFactor);
+				Patch(FoVAddr, FoVFactor);
 			}
 
 			Vector fwd = cam->Rotation.GetForward();
@@ -103,19 +144,21 @@ void FreeCamera::Thread()
 		}
 		else if (ms_bEnabled == 3)
 		{
-			Patch(_addr(0x80FA), {0x66, 0x89, 0x0C, 0x28});
-			Patch(_addr(0x102186), {0xD9, 0x5C, 0x24, 0x0C});
+			Patch(lowerText, {0xD8, 0x0D}); Patch(lowerText + 2, lowerOffset);
+			Patch(upperText, {0x8B, 0x5C, 0x24, 0x1C});
+			Patch(HUD, {0xD9, 0x5C, 0x24, 0x0C});
 
-			Patch(_addr(0xA1D21), {0xA3, 0x48, 0x83, 0x76, 0x00});
+			Patch(timeControl, {0xA3}); Patch(timeControl + 1, timeAddr);
 
-			Patch(_addr(0x2FFF08), defaultFoV);
+			Patch(FoVAddr, defaultFoV);
 
-			Patch(_addr(0x15303), {0x89, 0x11});
-			Patch(_addr(0x15308), {0x89, 0x51, 0x04});
-			Patch(_addr(0x1530E), {0x89, 0x41, 0x08});
+			Patch(camControl, {0x89, 0x11});
+			Patch(camControl + 5, {0x89, 0x51, 0x04});
+			Patch(camControl + 11, {0x89, 0x41, 0x08});
 
-			if (*((uint32_t*)_addr(0x356E24)) == 0)
-				Patch(_addr(0x356E24), 1);
+			if (*((uint32_t*)cullingAddr) == 0)
+				Patch(cullingAddr, 1);
+
 			ms_bEnabled = 0;
 		}
 

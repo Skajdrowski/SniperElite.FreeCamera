@@ -170,6 +170,7 @@
     <ClInclude Include="se1\Vector.h" />
     <ClInclude Include="SettingsMgr.h" />
     <ClInclude Include="utils\MemoryMgr.h" />
+    <ClInclude Include="utils\Patterns.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp" />
@@ -186,6 +187,7 @@
     <ClCompile Include="se1\Matrix.cpp" />
     <ClCompile Include="se1\Vector.cpp" />
     <ClCompile Include="SettingsMgr.cpp" />
+    <ClCompile Include="utils\Patterns.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SniperElite.FreeCamera.rc" />

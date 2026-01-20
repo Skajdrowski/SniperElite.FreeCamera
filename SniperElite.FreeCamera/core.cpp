@@ -10,3 +10,13 @@ int _addr(int addr)
 {
 	return GetEntryPoint() + addr;
 }
+
+uintptr_t SigScan(const char* pattern, bool read, uint32_t pad)
+{
+	hook::pattern Pattern(pattern);
+	uintptr_t OpcodeAddr = Pattern.count(1).get(0).get_uintptr(pad);
+	if (read)
+		Read(OpcodeAddr, OpcodeAddr);
+
+	return OpcodeAddr;
+}

@@ -3,5 +3,5 @@
 #include "..\core.h"
 Camera* GetCamera()
 {
-	return *(Camera**)(_addr(0x356E44));
+	return *(Camera**)(SigScan("8B ? ? ? ? ? C6 ? ? ? ? ? ? 8B ? 89 ? 8B ? ? 89", true, 2));
 }
