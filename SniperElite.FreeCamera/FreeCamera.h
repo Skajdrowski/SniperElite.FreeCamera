@@ -8,23 +8,31 @@ public:
 	static void Thread();
 private:
 	static Camera* cam;
-	static unsigned int ms_bEnabled;
+
+	enum State {
+		Disabled,
+		Enabling,
+		Enabled,
+		Disabling
+	};
+	static State ms_bEnabled;
 
 	static uintptr_t camControl;
 
-	static uintptr_t fpsAddr;
+	static float* fpsAddr;
 
 	static uintptr_t lowerText;
 	static uintptr_t lowerOffset;
 	static uintptr_t upperText;
 	static uintptr_t HUD;
+	static uintptr_t AC;
 
 	static uintptr_t timeControl;
-	static uintptr_t timeAddr;
+	static float* timeAddr;
 
-	static uintptr_t FoVAddr;
+	static float* FoVAddr;
 
-	static uintptr_t cullingAddr;
+	static unsigned int* cullingAddr;
 
 	static float timePause;
 	static float defaultFoV;

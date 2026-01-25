@@ -4,26 +4,27 @@
 #include "SettingsMgr.h"
 
 Camera* FreeCamera::cam = nullptr;
-unsigned int FreeCamera::ms_bEnabled = 0;
+FreeCamera::State FreeCamera::ms_bEnabled = Disabled;
 
-uintptr_t FreeCamera::camControl;
+uintptr_t FreeCamera::camControl = 0;
 
-uintptr_t FreeCamera::fpsAddr;
+float* FreeCamera::fpsAddr = nullptr;
 
-uintptr_t FreeCamera::lowerText;
-uintptr_t FreeCamera::lowerOffset;
-uintptr_t FreeCamera::upperText;
-uintptr_t FreeCamera::HUD;
+uintptr_t FreeCamera::lowerText = 0;
+uintptr_t FreeCamera::lowerOffset = 0;
+uintptr_t FreeCamera::upperText = 0;
+uintptr_t FreeCamera::HUD = 0;
+uintptr_t FreeCamera::AC = 0;
 
-uintptr_t FreeCamera::timeControl;
-uintptr_t FreeCamera::timeAddr;
+uintptr_t FreeCamera::timeControl = 0;
+float* FreeCamera::timeAddr = nullptr;
 
-uintptr_t FreeCamera::FoVAddr;
+float* FreeCamera::FoVAddr = nullptr;
 
-uintptr_t FreeCamera::cullingAddr;
+unsigned int* FreeCamera::cullingAddr = nullptr;
 
-float FreeCamera::timePause;
-float FreeCamera::defaultFoV;
+float FreeCamera::timePause = 0.0f;
+float FreeCamera::defaultFoV = 0.0f;
 
 constexpr float FreeCamera::clampf(float v, float lo, float hi)
 {
@@ -42,15 +43,15 @@ void FreeCamera::Thread()
 		static float FoVFactor;
 
 		if (GetAsyncKeyState(SettingsMgr->iFreeCameraEnableKey) & 0x1)
-			ms_bEnabled += 1;
+			ms_bEnabled = (State)(ms_bEnabled + 1);
 
-		if (ms_bEnabled == 1)
+		if (ms_bEnabled == Enabling)
 		{
 			if (!cam)
 				cam = GetCamera();
 
 			if (!fpsAddr)
-				fpsAddr = SigScan("C7 ? ? ? ? ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9 ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9", true, 2);
+				fpsAddr = (float*)SigScan("C7 ? ? ? ? ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9 ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9", true, 2);
 
 			if (!lowerText && !upperText && !HUD)
 			{
@@ -69,11 +70,11 @@ void FreeCamera::Thread()
 				Read(timeControl + 1, timeAddr);
 			}
 			Nop(timeControl, 5);
-			if (timePause != *((float*)timeAddr))
+			if (timePause != *timeAddr)
 				Read(timeAddr, timePause);
 
 			if (!FoVAddr)
-				FoVAddr = SigScan("D8 ? ? ? ? ? A1 ? ? ? ? C3 D8", true, 2);
+				FoVAddr = (float*)SigScan("D8 ? ? ? ? ? A1 ? ? ? ? C3 D8", true, 2);
 
 			if (!defaultFoV)
 				Read(FoVAddr, defaultFoV);
@@ -88,14 +89,18 @@ void FreeCamera::Thread()
 			Nop(camControl + 11, 3);
 
 			if (!cullingAddr)
-				cullingAddr = SigScan("C6 ? ? ? ? ? ? 5B E9 ? ? ? ? 5B", true, 2);
+				cullingAddr = (unsigned int*)SigScan("C6 ? ? ? ? ? ? 5B E9 ? ? ? ? 5B", true, 2);
 			Patch(cullingAddr, 0);
 
-			ms_bEnabled = 2;
+			if (!AC)
+				AC = SigScan("74 ? 56 8B ? E8 ? ? ? ? 5F 5E B0 ? 5B 81 ? ? ? ? ? C2", false);
+			Patch(AC, {0xEB, 0x08});
+
+			ms_bEnabled = Enabled;
 		}
-		else if (ms_bEnabled == 2)
+		else if (ms_bEnabled == Enabled)
 		{
-			const float framerate = *((float*)fpsAddr) / 60.f;
+			const float framerate = *fpsAddr / 60.f;
 			float speed = SettingsMgr->fFreeCameraSpeed * framerate;
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeySlowDown))
@@ -142,7 +147,7 @@ void FreeCamera::Thread()
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyLeft))
 				cam->Position -= right * speed;
 		}
-		else if (ms_bEnabled == 3)
+		else if (ms_bEnabled == Disabling)
 		{
 			Patch(lowerText, {0xD8, 0x0D}); Patch(lowerText + 2, lowerOffset);
 			Patch(upperText, {0x8B, 0x5C, 0x24, 0x1C});
@@ -156,10 +161,12 @@ void FreeCamera::Thread()
 			Patch(camControl + 5, {0x89, 0x51, 0x04});
 			Patch(camControl + 11, {0x89, 0x41, 0x08});
 
-			if (*((uint32_t*)cullingAddr) == 0)
+			if (*cullingAddr == 0)
 				Patch(cullingAddr, 1);
 
-			ms_bEnabled = 0;
+			Patch(AC, {0x74, 0x08});
+
+			ms_bEnabled = Disabled;
 		}
 
 		Sleep(1);
