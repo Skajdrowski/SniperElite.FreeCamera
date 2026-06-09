@@ -18,6 +18,7 @@ private:
 	static State ms_bEnabled;
 
 	static uintptr_t camControl;
+	static uintptr_t playerAimUpdateControl;
 
 	static float* fpsAddr;
 
@@ -25,7 +26,6 @@ private:
 	static uintptr_t lowerOffset;
 	static uintptr_t upperText;
 	static uintptr_t HUD;
-	static uintptr_t AC;
 
 	static uintptr_t timeControl;
 	static float* timeAddr;

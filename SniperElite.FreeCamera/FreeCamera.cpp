@@ -7,6 +7,7 @@ Camera* FreeCamera::cam = nullptr;
 FreeCamera::State FreeCamera::ms_bEnabled = Disabled;
 
 uintptr_t FreeCamera::camControl = 0;
+uintptr_t FreeCamera::playerAimUpdateControl = 0;
 
 float* FreeCamera::fpsAddr = nullptr;
 
@@ -14,7 +15,6 @@ uintptr_t FreeCamera::lowerText = 0;
 uintptr_t FreeCamera::lowerOffset = 0;
 uintptr_t FreeCamera::upperText = 0;
 uintptr_t FreeCamera::HUD = 0;
-uintptr_t FreeCamera::AC = 0;
 
 uintptr_t FreeCamera::timeControl = 0;
 float* FreeCamera::timeAddr = nullptr;
@@ -51,7 +51,7 @@ void FreeCamera::Thread()
 				cam = GetCamera();
 
 			if (!fpsAddr)
-				fpsAddr = (float*)SigScan("C7 ? ? ? ? ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9 ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9", true, 2);
+				fpsAddr = reinterpret_cast<float*>(SigScan("C7 ? ? ? ? ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9 ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9", true, 2));
 
 			if (!lowerText && !upperText && !HUD)
 			{
@@ -74,7 +74,7 @@ void FreeCamera::Thread()
 				Read(timeAddr, timePause);
 
 			if (!FoVAddr)
-				FoVAddr = (float*)SigScan("D8 ? ? ? ? ? A1 ? ? ? ? C3 D8", true, 2);
+				FoVAddr = reinterpret_cast<float*>(SigScan("D8 ? ? ? ? ? A1 ? ? ? ? C3 D8", true, 2));
 
 			if (!defaultFoV)
 				Read(FoVAddr, defaultFoV);
@@ -83,18 +83,17 @@ void FreeCamera::Thread()
 
 			if (!camControl)
 				camControl = SigScan("89 ? 8B ? ? 89 ? ? 8B ? ? 89 ? ? C3 ? ? ? ? ? ? ? ? ? ? ? ? ? ? 56", false);
-
 			Nop(camControl, 2);
 			Nop(camControl + 5, 3);
 			Nop(camControl + 11, 3);
 
-			if (!cullingAddr)
-				cullingAddr = (unsigned int*)SigScan("C6 ? ? ? ? ? ? 5B E9 ? ? ? ? 5B", true, 2);
-			Patch(cullingAddr, 0);
+			if (!playerAimUpdateControl)
+				playerAimUpdateControl = SigScan("57 8B CE E8 ? ? ? ? 8B CE E8 ? ? ? ? 8B CE E8 ? ? ? ? 8B 4E", false);
+			Nop(playerAimUpdateControl, 8);
 
-			if (!AC)
-				AC = SigScan("74 ? 56 8B ? E8 ? ? ? ? 5F 5E B0 ? 5B 81 ? ? ? ? ? C2", false);
-			Patch(AC, {0xEB, 0x08});
+			if (!cullingAddr)
+				cullingAddr = reinterpret_cast<unsigned int*>(SigScan("C6 ? ? ? ? ? ? 5B E9 ? ? ? ? 5B", true, 2));
+			Patch(cullingAddr, 0);
 
 			ms_bEnabled = Enabled;
 		}
@@ -161,10 +160,10 @@ void FreeCamera::Thread()
 			Patch(camControl + 5, {0x89, 0x51, 0x04});
 			Patch(camControl + 11, {0x89, 0x41, 0x08});
 
+			Patch(playerAimUpdateControl, {0x57, 0x8B, 0xCE, 0xE8, 0xF5, 0xE0, 0xFF, 0xFF});
+
 			if (*cullingAddr == 0)
 				Patch(cullingAddr, 1);
-
-			Patch(AC, {0x74, 0x08});
 
 			ms_bEnabled = Disabled;
 		}

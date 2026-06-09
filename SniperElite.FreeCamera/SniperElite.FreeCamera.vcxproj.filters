@@ -51,6 +51,9 @@
     <ClInclude Include="se1\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="utils\Patterns.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -78,6 +81,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="se1\Vector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Patterns.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
