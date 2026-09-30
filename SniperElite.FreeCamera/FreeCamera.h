@@ -19,6 +19,8 @@ private:
 
 	static uintptr_t camControl;
 	static uintptr_t playerAimUpdateControl;
+	static uintptr_t playerRotationControl;
+	static uintptr_t playerMovementRotationControl;
 
 	static float* fpsAddr;
 

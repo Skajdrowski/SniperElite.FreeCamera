@@ -8,6 +8,8 @@ FreeCamera::State FreeCamera::ms_bEnabled = Disabled;
 
 uintptr_t FreeCamera::camControl = 0;
 uintptr_t FreeCamera::playerAimUpdateControl = 0;
+uintptr_t FreeCamera::playerRotationControl = 0;
+uintptr_t FreeCamera::playerMovementRotationControl = 0;
 
 float* FreeCamera::fpsAddr = nullptr;
 
@@ -91,6 +93,14 @@ void FreeCamera::Thread()
 				playerAimUpdateControl = SigScan("57 8B CE E8 ? ? ? ? 8B CE E8 ? ? ? ? 8B CE E8 ? ? ? ? 8B 4E", false);
 			Nop(playerAimUpdateControl, 8);
 
+			if (!playerRotationControl)
+				playerRotationControl = SigScan("8B 4E 64 E8 ? ? ? ? 50 8B CF E8 ? ? ? ? 8B 56 64 85 D2 C6 86 04 01 00 00 01", false, 8);
+			Nop(playerRotationControl, 8);
+
+			if (!playerMovementRotationControl)
+				playerMovementRotationControl = SigScan("8B ? ? ? ? ? 8B ? C1 ? ? 81 ? ? ? ? ? 52", false, 6);
+			Patch(playerMovementRotationControl, {0x33, 0xD2});
+
 			if (!cullingAddr)
 				cullingAddr = reinterpret_cast<unsigned int*>(SigScan("C6 ? ? ? ? ? ? 5B E9 ? ? ? ? 5B", true, 2));
 			Patch(cullingAddr, 0);
@@ -161,6 +171,8 @@ void FreeCamera::Thread()
 			Patch(camControl + 11, {0x89, 0x41, 0x08});
 
 			Patch(playerAimUpdateControl, {0x57, 0x8B, 0xCE, 0xE8, 0xF5, 0xE0, 0xFF, 0xFF});
+			Patch(playerRotationControl, {0x50, 0x8B, 0xCF, 0xE8, 0x7F, 0x4B, 0xFF, 0xFF});
+			Patch(playerMovementRotationControl, {0x8B, 0xD0}); // mov edx, eax
 
 			if (*cullingAddr == 0)
 				Patch(cullingAddr, 1);
