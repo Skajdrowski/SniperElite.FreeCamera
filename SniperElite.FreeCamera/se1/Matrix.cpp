@@ -1,22 +1,22 @@
 #include "Matrix.h"
 
-Vector Matrix::GetForward()
+Vector Matrix::GetForward() const
 {
-	Vector fwd = forward;
+	Vector fwd(row0.Z, row1.Z, row2.Z);
 	fwd.Normalise();
-	Vector r = CrossProduct(fwd, Vector(0, 1, 0));
-	return r;
+	return fwd;
 }
 
-Vector Matrix::GetUp()
+Vector Matrix::GetUp() const
 {
-    return Vector(0, -1, 0);
+	Vector up(-row0.Y, -row1.Y, -row2.Y);
+	up.Normalise();
+	return up;
 }
 
-Vector Matrix::GetRight()
+Vector Matrix::GetRight() const
 {
-	Vector side = right;
+	Vector side(row0.X, row1.X, row2.X);
 	side.Normalise();
-	Vector f = CrossProduct(side, Vector(0, -1, 0));
-	return f;
+	return side;
 }

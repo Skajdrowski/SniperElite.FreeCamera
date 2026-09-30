@@ -33,8 +33,8 @@ void eSettingsManager::ResetKeys()
 	iFreeCameraEnableKey = VK_F1;
 	iFreeCameraKeyForward = 104;
 	iFreeCameraKeyBack = 98;
-	iFreeCameraKeyLeft = 102;
-	iFreeCameraKeyRight = 100;
+	iFreeCameraKeyLeft = 100;
+	iFreeCameraKeyRight = 102;
 	iFreeCameraKeyUp = 103;
 	iFreeCameraKeyDown = 97;
 	iFreeCameraKeySlowDown = 101;

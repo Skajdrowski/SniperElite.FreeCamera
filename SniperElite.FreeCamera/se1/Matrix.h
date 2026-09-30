@@ -3,11 +3,11 @@
 
 class Matrix {
 public:
-	Vector forward;
-	Vector up;
-	Vector right;
+	Vector row0;
+	Vector row1;
+	Vector row2;
 
-	Vector GetForward();
-	Vector GetUp();
-	Vector GetRight();
+	Vector GetForward() const;
+	Vector GetUp() const;
+	Vector GetRight() const;
 };
