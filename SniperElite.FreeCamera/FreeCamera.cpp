@@ -14,7 +14,6 @@ uintptr_t FreeCamera::playerMovementRotationControl = 0;
 float* FreeCamera::fpsAddr = nullptr;
 
 uintptr_t FreeCamera::lowerText = 0;
-uintptr_t FreeCamera::lowerOffset = 0;
 uintptr_t FreeCamera::upperText = 0;
 uintptr_t FreeCamera::HUD = 0;
 
@@ -55,16 +54,18 @@ void FreeCamera::Thread()
 			if (!fpsAddr)
 				fpsAddr = reinterpret_cast<float*>(SigScan("C7 ? ? ? ? ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9 ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9", true, 2));
 
-			if (!lowerText && !upperText && !HUD)
-			{
-				lowerText = SigScan("D8 ? ? ? ? ? D9 ? ? D9 ? ? ? D8 ? ? ? ? ? D9 ? ? ? ? ? D9 ? ? ? D8", false);
-				Read(lowerText + 2, lowerOffset);
-				upperText = SigScan("8B ? ? ? 83 ? ? 8D ? ? ? 50 89", false);
-				HUD = SigScan("D9 ? ? ? D9 ? ? ? D8 ? ? D9 ? ? D9 ? ? ? D8 ? ? D9 ? ? D9 ? ? ? D8", false);
-			}
-			Patch(lowerText, {0xD8, 0xC8, 0x90, 0x90, 0x90, 0x90});
-			Nop(upperText, 4);
-			Nop(HUD, 4);
+			if (!lowerText)
+				lowerText = SigScan("56 8B ? E8 ? ? ? ? 84 ? 74 ? A0 ? ? ? ? 84 ? 0F", false);
+			if (!upperText)
+				upperText = SigScan("83 ? ? 57 8B ? ? ? 85 ? 0F ? ? ? ? ? D9", false);
+			if (!HUD)
+				HUD = SigScan("8B ? ? 8B ? FF ? ? EB ? 8B ? ? 8B ? FF ? ? A0", false, 5);
+
+			Patch(lowerText, {0xC2, 0x04, 0x00});
+			Patch(upperText, {0xC2, 0x0C, 0x00});
+
+			Nop(HUD, 3);
+			Nop(HUD + 10, 3);
 
 			if (!timeControl)
 			{
@@ -158,9 +159,10 @@ void FreeCamera::Thread()
 		}
 		else if (ms_bEnabled == Disabling)
 		{
-			Patch(lowerText, {0xD8, 0x0D}); Patch(lowerText + 2, lowerOffset);
-			Patch(upperText, {0x8B, 0x5C, 0x24, 0x1C});
-			Patch(HUD, {0xD9, 0x5C, 0x24, 0x0C});
+			Patch(lowerText, {0x56, 0x8B, 0xF1});
+			Patch(upperText, {0x83, 0xEC, 0x20});
+			Patch(HUD, {0xFF, 0x50, 0x0C});
+			Patch(HUD + 10, {0xFF, 0x52, 0x0C});
 
 			Patch(timeControl, {0xA3}); Patch(timeControl + 1, timeAddr);
 

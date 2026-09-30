@@ -25,7 +25,6 @@ private:
 	static float* fpsAddr;
 
 	static uintptr_t lowerText;
-	static uintptr_t lowerOffset;
 	static uintptr_t upperText;
 	static uintptr_t HUD;
 
