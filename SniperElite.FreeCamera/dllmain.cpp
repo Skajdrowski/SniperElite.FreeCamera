@@ -3,20 +3,8 @@
 #include "core.h"
 #include "FreeCamera.h"
 #include "SettingsMgr.h"
-#ifdef _DEBUG
-BOOL WINAPI IsDebuggerPresent_Hook()
-{
-    return FALSE;
-}
-#endif
-void Init()
-{
-    FreeCamera::Init();
-#ifdef _DEBUG
-    SettingsMgr->ResetKeys();
-    Patch(_addr(GetEntryPoint()), IsDebuggerPresent_Hook);
-#endif
-}
+
+void Init() { FreeCamera::Init(); SettingsMgr->ResetKeys(); }
 
 
 
