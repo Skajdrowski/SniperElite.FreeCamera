@@ -24,8 +24,6 @@ private:
 	static size_t playerRotationCallOffset;
 	static uintptr_t playerMovementRotationControl;
 
-	static float* fpsAddr;
-
 	static uintptr_t lowerText;
 	static uintptr_t upperText;
 	static uintptr_t HUD;

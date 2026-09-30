@@ -2,6 +2,7 @@
 #include "FreeCamera.h"
 #include "se1/Camera.h"
 #include "SettingsMgr.h"
+#include <chrono>
 
 Camera* FreeCamera::cam = nullptr;
 FreeCamera::State FreeCamera::ms_bEnabled = Disabled;
@@ -12,8 +13,6 @@ size_t FreeCamera::playerAimUpdateCallOffset = 0;
 uintptr_t FreeCamera::playerRotationControl = 0;
 size_t FreeCamera::playerRotationCallOffset = 0;
 uintptr_t FreeCamera::playerMovementRotationControl = 0;
-
-float* FreeCamera::fpsAddr = nullptr;
 
 uintptr_t FreeCamera::lowerText = 0;
 uintptr_t FreeCamera::upperText = 0;
@@ -41,9 +40,14 @@ void FreeCamera::Init()
 
 void FreeCamera::Thread()
 {
+	auto lastUpdate = std::chrono::steady_clock::now();
+
 	while (true)
 	{
 		static float FoVFactor;
+		const auto now = std::chrono::steady_clock::now();
+		const float deltaSeconds = std::chrono::duration<float>(now - lastUpdate).count();
+		lastUpdate = now;
 
 		if (GetAsyncKeyState(SettingsMgr->iFreeCameraEnableKey) & 0x1)
 			ms_bEnabled = (State)(ms_bEnabled + 1);
@@ -52,9 +56,6 @@ void FreeCamera::Thread()
 		{
 			if (!cam)
 				cam = GetCamera();
-
-			if (!fpsAddr)
-				fpsAddr = reinterpret_cast<float*>(SigScan("C7 ? ? ? ? ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9 ? ? ? ? ? D9 ? ? ? ? ? D8 ? ? ? ? ? D9", true, 2));
 
 			if (!lowerText)
 				lowerText = SigScan("56 8B ? E8 ? ? ? ? 84 ? 74 ? A0 ? ? ? ? 84 ? 0F", false);
@@ -114,12 +115,13 @@ void FreeCamera::Thread()
 				cullingAddr = reinterpret_cast<unsigned int*>(SigScan("C6 ? ? ? ? ? ? 5B E9 ? ? ? ? 5B", true, 2));
 			Patch(cullingAddr, 0);
 
+			lastUpdate = std::chrono::steady_clock::now();
 			ms_bEnabled = Enabled;
 		}
 		else if (ms_bEnabled == Enabled)
 		{
-			const float framerate = *fpsAddr / 60.f;
-			float speed = SettingsMgr->fFreeCameraSpeed * framerate;
+			const float timeFactor = clampf(deltaSeconds, 0.f, 0.1f) * 1000.f;
+			float speed = SettingsMgr->fFreeCameraSpeed * timeFactor;
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeySlowDown))
 				speed /= SettingsMgr->fFreeCameraModifierScale;
@@ -138,12 +140,12 @@ void FreeCamera::Thread()
 
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyFoVDecrease))
 			{
-				FoVFactor -= 0.1f * framerate; FoVFactor = clampf(FoVFactor, 1.f, 165.f);
+				FoVFactor -= 0.1f * timeFactor; FoVFactor = clampf(FoVFactor, 1.f, 165.f);
 				Patch(FoVAddr, FoVFactor);
 			}
 			if (GetAsyncKeyState(SettingsMgr->iFreeCameraKeyFoVIncrease))
 			{
-				FoVFactor += 0.1f * framerate; FoVFactor = clampf(FoVFactor, 1.f, 165.f);
+				FoVFactor += 0.1f * timeFactor; FoVFactor = clampf(FoVFactor, 1.f, 165.f);
 				Patch(FoVAddr, FoVFactor);
 			}
 
