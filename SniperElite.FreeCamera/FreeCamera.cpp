@@ -8,7 +8,9 @@ FreeCamera::State FreeCamera::ms_bEnabled = Disabled;
 
 uintptr_t FreeCamera::camControl = 0;
 uintptr_t FreeCamera::playerAimUpdateControl = 0;
+size_t FreeCamera::playerAimUpdateCallOffset = 0;
 uintptr_t FreeCamera::playerRotationControl = 0;
+size_t FreeCamera::playerRotationCallOffset = 0;
 uintptr_t FreeCamera::playerMovementRotationControl = 0;
 
 float* FreeCamera::fpsAddr = nullptr;
@@ -91,11 +93,17 @@ void FreeCamera::Thread()
 			Nop(camControl + 11, 3);
 
 			if (!playerAimUpdateControl)
+			{
 				playerAimUpdateControl = SigScan("57 8B CE E8 ? ? ? ? 8B CE E8 ? ? ? ? 8B CE E8 ? ? ? ? 8B 4E", false);
+				Read(playerAimUpdateControl + 4, playerAimUpdateCallOffset);
+			}
 			Nop(playerAimUpdateControl, 8);
 
 			if (!playerRotationControl)
+			{
 				playerRotationControl = SigScan("8B 4E 64 E8 ? ? ? ? 50 8B CF E8 ? ? ? ? 8B 56 64 85 D2 C6 86 04 01 00 00 01", false, 8);
+				Read(playerRotationControl + 4, playerRotationCallOffset);
+			}
 			Nop(playerRotationControl, 8);
 
 			if (!playerMovementRotationControl)
@@ -172,9 +180,17 @@ void FreeCamera::Thread()
 			Patch(camControl + 5, {0x89, 0x51, 0x04});
 			Patch(camControl + 11, {0x89, 0x41, 0x08});
 
-			Patch(playerAimUpdateControl, {0x57, 0x8B, 0xCE, 0xE8, 0xF5, 0xE0, 0xFF, 0xFF});
-			Patch(playerRotationControl, {0x50, 0x8B, 0xCF, 0xE8, 0x7F, 0x4B, 0xFF, 0xFF});
-			Patch(playerMovementRotationControl, {0x8B, 0xD0}); // mov edx, eax
+			Patch(playerAimUpdateControl, {0x57, 0x8B, 0xCE, 0xE8,
+				static_cast<uint8_t>(playerAimUpdateCallOffset),
+				static_cast<uint8_t>(playerAimUpdateCallOffset >> 8),
+				static_cast<uint8_t>(playerAimUpdateCallOffset >> 16),
+				static_cast<uint8_t>(playerAimUpdateCallOffset >> 24)});
+			Patch(playerRotationControl, {0x50, 0x8B, 0xCF, 0xE8,
+				static_cast<uint8_t>(playerRotationCallOffset),
+				static_cast<uint8_t>(playerRotationCallOffset >> 8),
+				static_cast<uint8_t>(playerRotationCallOffset >> 16),
+				static_cast<uint8_t>(playerRotationCallOffset >> 24)});
+			Patch(playerMovementRotationControl, {0x8B, 0xD0});
 
 			if (*cullingAddr == 0)
 				Patch(cullingAddr, 1);

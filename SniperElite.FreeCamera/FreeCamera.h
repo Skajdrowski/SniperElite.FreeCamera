@@ -19,7 +19,9 @@ private:
 
 	static uintptr_t camControl;
 	static uintptr_t playerAimUpdateControl;
+	static size_t playerAimUpdateCallOffset;
 	static uintptr_t playerRotationControl;
+	static size_t playerRotationCallOffset;
 	static uintptr_t playerMovementRotationControl;
 
 	static float* fpsAddr;
